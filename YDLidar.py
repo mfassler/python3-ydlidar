@@ -28,6 +28,7 @@ def parse_single_response(mode, _type, payload):
 class YDLidar:
     def __init__(self, device, baud):
         self._ser = serial.Serial(device, baud)
+        self._running = True
         self._t1 = threading.Thread(target=self.reading_task)
         self._t1.start()
 
@@ -39,7 +40,7 @@ class YDLidar:
     def reading_task(self):
         #count = 0
         #while count < 100:
-        while True:
+        while self._running:
             c = self._ser.read(1)
 
             # Single-reponse packets begin with 0xA5, 0x5A
@@ -82,7 +83,14 @@ class YDLidar:
             else:  # invalid 1st char
                 print('parser miss (expecting either 0xa5 or 0xaa):', c)
 
+        if not self._running:
+            self._thread_quit()
+
+
     def parse_pc_packet(self, angle_start, angle_end, payload):
+        pass
+
+    def _thread_quit(self):
         pass
 
     def stop(self):

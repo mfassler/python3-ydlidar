@@ -4,6 +4,7 @@ import sys
 if sys.version_info[0] < 3:
     raise Exception("Must be using Python 3")
 
+import signal
 import numpy as np
 import cv2
 
@@ -50,9 +51,25 @@ class LidarWithVisual(YDLidar):
             self.prev_angle = angle_start
 
 
+    def _thread_quit(self):
+        cv2.destroyWindow('asdf')
+
+
+    def quit(self):
+        self.force_stop()
+        self._running = False
+        self._t1.join()
+        self._ser.close()
+
+
 
 lidar = LidarWithVisual('/dev/ttyUSB0', 500000)
+def handle_quit(sig, frame):
+    print('Shutting down...')
+    lidar.quit()
 
+signal.signal(signal.SIGHUP, handle_quit)
+signal.signal(signal.SIGINT, handle_quit)
 
 lidar.force_stop()
 lidar.stop()

@@ -20,8 +20,11 @@ from YDLidar import YDLidar
 PIXELS_PER_METER = 100
 
 
-MOAB_ADDR = ('192.168.0.69', 12346)
+MOAB_ADDR = ('192.168.13.201', 12346)
 
+DO_GUI = False
+DO_NETWORK = True
+IMG_RECV_ADDRESS = ('192.168.13.101', 53521)
 
 def check_color(a, b):
     return a[0] == b[0] and a[1] == b[1] and a[2] == b[2]
@@ -78,8 +81,26 @@ class LidarWithVisual(YDLidar):
                             self.amap[y_pixel, x_pixel] = 0,0,0
 
             if angle_start < self.prev_angle:
-                cv2.imshow('asdf', self.amap)
-                cv2.waitKey(1)
+                if DO_NETWORK:
+                    _nothing, pngBuffer = cv2.imencode('*.png', self.amap)
+                    bufLen = len(pngBuffer)
+                    filepos = 0
+                    numbytes = 0
+                    START_MAGIC = b"__HylPnaJY_START_PNG %09d\n" % (bufLen)
+                    self._sock.sendto(START_MAGIC, IMG_RECV_ADDRESS)
+                    while filepos < bufLen:
+                        if (bufLen - filepos) < 1400:
+                            numbytes = bufLen - filepos
+                        else:
+                            numbytes = 1400  # ethernet MTU is 1500
+                        self._sock.sendto(pngBuffer[filepos:(filepos+numbytes)], IMG_RECV_ADDRESS)
+                        filepos += numbytes
+                    STOP_MAGIC = b"_g1nC_EOF"
+                    self._sock.sendto(STOP_MAGIC, IMG_RECV_ADDRESS)
+
+                if DO_GUI:
+                    cv2.imshow('asdf', self.amap)
+                    cv2.waitKey(1)
 
                 # Auto-pilot:
                 if self.closest_black_object[0] < 499.0:
@@ -91,11 +112,11 @@ class LidarWithVisual(YDLidar):
                     r, x, y = self.closest_yellow_object
                     if x < 0:  # object on right
                         print('  <---- steer left')
-                        sbus_steering = 1024 - 200
+                        sbus_steering = 1024 - 100
                         sbus_throttle = 1200
                     else:  # object on left
                         print('  steer right ---->')
-                        sbus_steering = 1024 + 200
+                        sbus_steering = 1024 + 100
                         sbus_throttle = 1200
 
                 else:

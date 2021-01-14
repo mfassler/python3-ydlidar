@@ -13,11 +13,12 @@ from misc_map_tools import make_map
 
 from YDLidar import YDLidar
 
+PIXELS_PER_METER = 100
 
 class LidarWithVisual(YDLidar):
     def __init__(self, *args, **kwargs):
         super(LidarWithVisual, self).__init__(*args, **kwargs)
-        self._a_map = make_map(800, 800, 100)
+        self._a_map = make_map(800, 800, PIXELS_PER_METER)
         self.amap = np.copy(self._a_map)
         self.prev_angle = 0.0
 
@@ -36,8 +37,8 @@ class LidarWithVisual(YDLidar):
             x = r * np.sin(theta)
             y = r * np.cos(theta)
 
-            x_pixel = int(round(-x*100 + 400))
-            y_pixel = int(round(y*100 + 400))
+            x_pixel = int(round(-x*PIXELS_PER_METER + 400))
+            y_pixel = int(round(y*PIXELS_PER_METER + 400))
 
             if x_pixel > 1 and x_pixel < 798:
                 if y_pixel > 1 and y_pixel < 798:

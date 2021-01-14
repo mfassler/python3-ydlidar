@@ -4,6 +4,14 @@ import cv2 as cv
 
 
 def make_map(width, height, grid_spacing):
+    '''
+    width : int
+        pixel width of map
+    height : int
+        pixel height of map
+    grid_spacing : int
+        pixels per meters
+    '''
     _map = np.ones((height, width, 3), np.uint8) * 255
 
     # Draw the grid:

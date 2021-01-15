@@ -40,9 +40,9 @@ def make_map(width, height, grid_spacing):
 
 
 def make_yellow_avoidance_area(img, PIXELS_PER_METER):
-    vehicle_width = 0.5  # meters, float
-    max_width = 1.0  # meters, float
-    max_distance = 2.0  # meters, float
+    vehicle_width = 0.48  # meters, float
+    max_width = 0.75  # meters, float
+    max_distance = 1.5  # meters, float
 
     # Convert these real, float values into pixels on the radar screen:
     h_center = 400  # pixel center of img
@@ -69,8 +69,8 @@ def make_yellow_avoidance_area(img, PIXELS_PER_METER):
 
 
 def make_black_avoidance_area(img, PIXELS_PER_METER):
-    vehicle_width = 0.5  # meters, float
-    max_distance = 0.5 # meters, float
+    vehicle_width = 0.48  # meters, float
+    max_distance = 0.75 # meters, float
     k_w = int(round(vehicle_width * PIXELS_PER_METER / 2))
     k_h = int(round(max_distance * PIXELS_PER_METER))
 

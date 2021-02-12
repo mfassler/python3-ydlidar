@@ -110,18 +110,22 @@ class LidarWithVisual(YDLidar):
 
                 elif self.closest_yellow_object[0] < 499.0:
                     r, x, y = self.closest_yellow_object
+                    reaction_strength = (2.0 - r) / 2.0
+                    reaction_strength = np.clip(reaction_strength, 0.0, 1.0)
+                    steering_adjust = int(round(30 * reaction_strength))
+                    throttle_adjust = int(round(30 * reaction_strength))
                     if x < 0:  # object on right
-                        print('  <---- steer left')
-                        sbus_steering = 1024 - 40
-                        sbus_throttle = 1124
+                        print('  <---- steer left', r)
+                        sbus_steering = 1024 - steering_adjust
+                        sbus_throttle = 1175 - throttle_adjust
                     else:  # object on left
-                        print('  steer right ---->')
-                        sbus_steering = 1024 + 40
-                        sbus_throttle = 1124
+                        print('  steer right ---->', r)
+                        sbus_steering = 1024 + steering_adjust
+                        sbus_throttle = 1175 - throttle_adjust
 
                 else:
                     sbus_steering = 1024
-                    sbus_throttle = 1224
+                    sbus_throttle = 1175
 
                 pkt = struct.pack('HH', sbus_steering, sbus_throttle)
                 self._sock.sendto(pkt, MOAB_ADDR)

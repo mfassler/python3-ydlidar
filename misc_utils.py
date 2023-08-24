@@ -12,7 +12,7 @@ def get_last_packet(sock, bufsize=65536, verbose=False):
             tmpData, addr = sock.recvfrom(bufsize)
         except Exception as ee:
             #print(ee)
-            cont=False
+            cont = False
         else:
             if tmpData:
                 if data is not None:
@@ -20,7 +20,7 @@ def get_last_packet(sock, bufsize=65536, verbose=False):
                         print('throwing away a packet (GUI is too slow)')
                 data = tmpData
             else:
-                cont=False
+                cont = False
     sock.setblocking(1)
     return data, addr
 

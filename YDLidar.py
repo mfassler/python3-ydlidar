@@ -106,12 +106,12 @@ class YDLidar:
                     print('parser miss (expecting 0x55):', c)
 
             else:  # invalid 1st char
+                pass
                 # We always seem to get an extra byte around lsa ~= 13800... wtf...
-                print('parser miss (expecting either 0xa5 or 0xaa):', c, 'lsn:', lsn, fsa, lsa)
+                #print('parser miss (expecting either 0xa5 or 0xaa):', c, 'lsn:', lsn, fsa, lsa)
 
     def send_then_get(self, pkt):
         # empty out the RX buffer
-        print('send then get...', self._ser.inWaiting())
         nothing = self._ser.read(self._ser.inWaiting())
 
         self._ser.write(pkt)
@@ -223,11 +223,8 @@ class YDLidar:
         '''
         Increase scan frequency by 1 Hz
         '''
-        print('a')
         pkt = bytes([0xa5, 0x0b])
-        print('b')
         mode, _type, payload = self.send_then_get(pkt)
-        print('c')
         return self._parse_scan_frequency(mode, _type, payload)
 
     def decrease_scan_freq_1hz(self):
@@ -263,8 +260,12 @@ if __name__ == '__main__':
 
     #lidar = YDLidar('/dev/ttyUSB0', 500000)
     lidar = YDLidar('/dev/ttyUSB0', 512000)
+
+    lidar.get_device_info()
+    lidar.get_device_health()
     freq = lidar.set_desired_scan_frequency(11.5)
-    print(f'Current scan frequency: {freq} Hz')
+    print(f'Scan frequency: {freq} Hz')
+
     #lidar.start()
 
 

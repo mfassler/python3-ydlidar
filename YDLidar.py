@@ -266,6 +266,6 @@ if __name__ == '__main__':
     freq = lidar.set_desired_scan_frequency(11.5)
     print(f'Scan frequency: {freq} Hz')
 
-    #lidar.start()
+    lidar.start()
 
 

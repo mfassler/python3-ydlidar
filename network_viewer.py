@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 import struct
 import socket
 import numpy as np
@@ -22,7 +21,7 @@ class LidarViewer:
     def run(self):
         while True:
             pkt, addr = self._sock.recvfrom(65535)
-            print('rx', len(pkt), 'bytes')
+            #print('rx', len(pkt), 'bytes')
 
             fsa, lsa = struct.unpack('<HH', pkt[:4])
             pc_data = pkt[4:]
@@ -30,7 +29,7 @@ class LidarViewer:
             self.parse_pc_packet(fsa, lsa, pc_data)
 
     def parse_pc_packet(self, angle_start, angle_end, payload):
-        print('parse_pc_packet')
+        #print('parse_pc_packet')
         rad_start = np.radians(angle_start / 128.0)
         rad_end = np.radians(angle_end / 128.0)
         if rad_end < rad_start:
@@ -52,14 +51,8 @@ class LidarViewer:
                     self.amap[y_pixel, x_pixel] = 0, 0, 0
 
             if angle_start < self.prev_angle:
-                print('c', end='')
-                sys.stdout.flush()
                 cv2.imshow('asdf', self.amap)
-                print('c', end='')
-                sys.stdout.flush()
                 cv2.waitKey(1)
-                print('c', end='')
-                sys.stdout.flush()
                 self.amap = np.copy(self._a_map)
 
             self.prev_angle = angle_start

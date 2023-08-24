@@ -81,9 +81,19 @@ class YDLidar:
                     plen &= 0x3fffffff
                     mode = (len_mode_type[3] & 0xc0) >> 6
                     _type = len_mode_type[4]
-                    print('WARNING:  received a single-response packet during continuous mode')
-                    print('plen:', plen, 'mode:', mode, 'type:', _type)
-                    payload = self._ser.read(plen)
+
+                    if mode == 0:
+                        print('WARNING:  received a single-response packet during continuous mode')
+                        print('plen:', plen, 'mode:', mode, 'type:', _type)
+                        payload = self._ser.read(plen)
+                    elif _type == 0x81 and plen == 5:
+                        # Ignore the payload (plen==5) ... I guess it just jumps
+                        # into continuous mode...
+                        print('Scan mode started')
+                    else:
+                        print('WARNING:  unknown packet')
+                        print('plen:', plen, 'mode:', mode, 'type:', _type)
+                        payload = self._ser.read(plen)
 
                 else:  # invalid 2nd char
                     print('parser miss (expecting 0x5a):', c)

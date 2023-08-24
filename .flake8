@@ -1,0 +1,16 @@
+[flake8]
+ignore =
+	# W391 blank line at end of file
+	W391
+
+	# they plan to reverse the best-practices for this one:
+	# W503 line break before binary operator
+	W503
+
+	# just for now:
+	# E265 block comment should start with '# '
+	E265
+
+max-line-length = 100
+
+

@@ -13,7 +13,7 @@ PIXELS_PER_METER = 100
 class LidarViewer:
     def __init__(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.bind(('127.0.0.1', 25811))
+        self._sock.bind(('0.0.0.0', 25811))
         self._a_map = make_map(800, 800, PIXELS_PER_METER)
         self.amap = np.copy(self._a_map)
         self.prev_angle = 0.0

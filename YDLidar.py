@@ -8,11 +8,11 @@ import serial
 
 
 class YDLidar:
-    def __init__(self, device, baud):
+    def __init__(self, device, baud, destination_addr):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         #self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._sock.bind(("0.0.0.0", 0))
-        self._DEST_ADDR = ('127.0.0.1', 25811)
+        self._DEST_ADDR = destination_addr
 
         self._ser = serial.Serial(device, baud)
 
@@ -269,7 +269,7 @@ class YDLidar:
 if __name__ == '__main__':
 
     #lidar = YDLidar('/dev/ttyUSB0', 500000)
-    lidar = YDLidar('/dev/ttyUSB0', 512000)
+    lidar = YDLidar('/dev/ttyUSB0', 512000, ('127.0.0.1', 25811))
 
     lidar.get_device_info()
     lidar.get_device_health()

@@ -8,13 +8,25 @@ import serial
 
 
 class YDLidar:
-    def __init__(self, device, baud, destination_addr):
+    def __init__(self, device, baud, destination_addr, offset_degrees=0):
+        '''
+        Parameters
+        ----------
+        device : path to serial port device (eg: "/dev/ttyUSB0")
+        baud : baud rate of serial port
+        destination_addr : network address of viewer (eg:  ("192.168.1.5", 25811)
+        offset_degrees : rotational offset of lidar (to allow for mis-mounting)
+        '''
+
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         #self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._sock.bind(("0.0.0.0", 0))
         self._DEST_ADDR = destination_addr
 
         self._ser = serial.Serial(device, baud)
+
+        # Allow for the lidar to be slightly mis-mounted (rotation):
+        self._offset = int(round(offset_degrees * 128))
 
         # Send stop command:
         pkt = bytes([0xa5, 0x65])  # Stop scanning (and switch to idle mode)
@@ -105,6 +117,16 @@ class YDLidar:
                     ct, lsn, fsa, lsa, cs = struct.unpack('<BBHHH', self._ser.read(8))
                     pc_data = self._ser.read(lsn * 2)
                     if ct & 0x01 == 0:
+
+                        # Rotational offset
+                        # (to allow for slight mis-mounting)
+                        fsa = fsa + self._offset
+                        lsa = lsa + self._offset
+                        if fsa < 0:
+                            fsa += 360 * 128
+                        if lsa < 0:
+                            lsa += 360 * 128
+
                         self.parse_pc_packet(fsa, lsa, pc_data)
                         #if fsa <= 13800 and lsa >= 13800:
                         #    nothing = self._ser.read(1)
@@ -151,7 +173,7 @@ class YDLidar:
         Parameters
         ----------
         fsa : int, start angle *128
-        lsa : int, start angle *128
+        lsa : int, end angle *128
         pc_data : bytes, pointcloud data, array of 2-bytes, little-endian
             usually, about 80 bytes (40 samples), I think
         '''
@@ -268,8 +290,12 @@ class YDLidar:
 
 if __name__ == '__main__':
 
-    #lidar = YDLidar('/dev/ttyUSB0', 500000)
-    lidar = YDLidar('/dev/ttyUSB0', 512000, ('127.0.0.1', 25811))
+    #lidar = YDLidar('/dev/ttyUSB0', 512000, ('127.0.0.1', 25811))
+
+    SERIAL_DEVICE = '/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0'
+    #lidar = YDLidar(SERIAL_DEVICE, 512000, ('192.168.0.104', 25811))
+    #lidar = YDLidar(SERIAL_DEVICE, 512000, ('192.168.0.116', 25811))
+    lidar = YDLidar(SERIAL_DEVICE, 512000, ('192.168.1.5', 25811), -3.125)
 
     lidar.get_device_info()
     lidar.get_device_health()

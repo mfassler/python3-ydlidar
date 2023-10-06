@@ -17,9 +17,10 @@ class LidarViewer:
         self._a_map = make_map(800, 800, PIXELS_PER_METER)
         self.amap = np.copy(self._a_map)
         self.prev_angle = 0.0
+        self._KEEP_RUNNING = True
 
     def run(self):
-        while True:
+        while self._KEEP_RUNNING:
             pkt, addr = self._sock.recvfrom(65535)
             #print('rx', len(pkt), 'bytes')
 
@@ -40,6 +41,8 @@ class LidarViewer:
 
         for i, theta in enumerate(angleSpace):
             r = ranges[i]
+            if r == 0:
+                continue
 
             # For the Lidar:
             #  Theta 0.0 is pointing backwards (towards the cable), laser rotates clockwise.
@@ -62,8 +65,12 @@ class LidarViewer:
 
             if angle_start < self.prev_angle:
                 cv2.imshow('asdf', self.amap)
-                cv2.waitKey(1)
-                self.amap = np.copy(self._a_map)
+                key = cv2.waitKey(1)
+                if key == 27:   # ESC Key
+                    print('Quitting...')
+                    self._KEEP_RUNNING = False
+                else:
+                    self.amap = np.copy(self._a_map)
 
             self.prev_angle = angle_start
 

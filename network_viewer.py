@@ -40,11 +40,21 @@ class LidarViewer:
 
         for i, theta in enumerate(angleSpace):
             r = ranges[i]
-            x = r * np.sin(theta)
-            y = r * np.cos(theta)
 
-            x_pixel = int(round(-x * PIXELS_PER_METER + 400))
-            y_pixel = int(round(y * PIXELS_PER_METER + 400))
+            # For the Lidar:
+            #  Theta 0.0 is pointing backwards (towards the cable), laser rotates clockwise.
+            #
+            # For the robot, we have an FRD coordinate system (like ArduPilot):
+            #  +X is Forward
+            #  +Y is Right
+            #  (+Z is Down, but we're just 2-dimensional, here)
+
+            frd_x = -r * np.cos(theta)  # Forward is +X, meters
+            frd_y = -r * np.sin(theta)  # Rightward is +Y, meters
+
+            # In computer graphics, +x is rightward, +y is downard, and the origin is top-left
+            x_pixel = int(round(frd_y * PIXELS_PER_METER + 400))  # rightward pixels, opencv bitmap
+            y_pixel = int(round(-frd_x * PIXELS_PER_METER + 400))  # downward pixels, opencv bitmap
 
             if x_pixel > 1 and x_pixel < 798:
                 if y_pixel > 1 and y_pixel < 798:
